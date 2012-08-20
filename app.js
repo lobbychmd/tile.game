@@ -15,6 +15,7 @@ app.configure(function(){
     //app.set('view engine', 'jade');
   app.set('view engine', 'jqtpl');
   app.register(".html", require("jqtpl").express);
+
   app.use(express.bodyParser());
   app.use(express.methodOverride());
   app.use(app.router);
