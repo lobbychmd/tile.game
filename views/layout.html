@@ -16,10 +16,10 @@
     </style>
     <script>
         $(document).ready(function () {
-            $.tg.setup($("#mainSence>canvas")[0], {
+            var game = new TileGame($("#mainSence>canvas")[0], {
                 bgH: 2932, bgW: 512, scrH: 240, scrW: 320, canvasH: 96, canvasW: 128, posX: 0, posY: 300, carX: 0, carY: 0, tankX: 94, tankY: 346
             });
-            $.tg.run();
+            game.run();
 
             $('#car').focus();
 
