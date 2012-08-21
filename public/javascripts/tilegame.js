@@ -40,9 +40,10 @@ TileGame.prototype = {
 
     //设定背景 css的 偏移
     calcTranslate: function (canvas, x, y) {
+        //alert(this.size);
         if (x == undefined) x = canvas.attr('id').split('_')[1];
         if (y == undefined) y = canvas.attr('id').split('_')[2];
-        var translate = 'translate(' + (x * this.size.canvasW - this.size.posX) + 'px, ' + (y * this.size.canvasH - this.realY(size.posY)) + 'px)';
+        var translate = 'translate(' + (x * this.size.canvasW - this.size.posX) + 'px, ' + (y * this.size.canvasH - this.realY(this.size.posY)) + 'px)';
         canvas.css('-webkit-transform', translate);
         canvas.css('-moz-transform', translate);
     },
@@ -58,46 +59,48 @@ TileGame.prototype = {
     },
 
     keyboardInit: function () {
+        var size = this.size;
+        var game = this;
         $('body').keydown(function (event) {
             var pos = { 38: [0, 2], 37: [-2, 0], 39: [2, 0], 40: [0, -2] };
             var p = pos[event.which];
             if (p) {
                 if (p[0] > 0) {  //右移
-                    this.size.carX += p[0];
-                    if ((this.size.carX + 48) > this.size.scrW) {
-                        this.size.carX = this.size.scrW - 48;
-                        this.size.posX += p[0];
-                        if ((this.size.posX + this.size.scrW) > this.size.bgW) this.size.posX = this.size.bgW - this.size.scrW;
+                    size.carX += p[0];
+                    if ((size.carX + 48) > size.scrW) {
+                        size.carX = size.scrW - 48;
+                        size.posX += p[0];
+                        if ((size.posX + size.scrW) > size.bgW) size.posX = size.bgW - size.scrW;
                     }
                 } else if (p[0] < 0) {  //左移
-                    this.size.carX += p[0];
-                    if (this.size.carX < 0) {
-                        this.size.carX = 0;
-                        this.size.posX += p[0];
-                        if (this.size.posX < 0) this.size.posX = 0;
+                    size.carX += p[0];
+                    if (size.carX < 0) {
+                        size.carX = 0;
+                        size.posX += p[0];
+                        if (size.posX < 0) size.posX = 0;
                     }
                 } else if (p[1] > 0) {  //上移 
-                    this.size.carY += p[1];
-                    var Y = this.realY(this.size.carY, this.size.scrH, 48);
+                    size.carY += p[1];
+                    var Y = game.realY(size.carY, size.scrH, 48);
                     if (Y < 0) {
-                        this.size.carY = this.size.scrH - 48;
-                        this.size.posY += p[1];
-                        var YY = this.realY(this.size.posY);
-                        if (YY < 0) this.size.posY = this.size.bgH - this.size.scrH;
+                        size.carY = size.scrH - 48;
+                        size.posY += p[1];
+                        var YY = game.realY(size.posY);
+                        if (YY < 0) size.posY = size.bgH - size.scrH;
                     }
                 } else if (p[1] < 0) {  //下移
-                    this.size.carY += p[1];
-                    var Y = this.realY(this.size.carY, this.size.scrH, 48);
-                    if ((Y + 48) > this.size.scrH) {
-                        this.size.carY = 0;
-                        this.size.posY += p[1];
-                        var YY = this.realY(this.size.posY);
-                        if ((YY + this.size.scrH) > this.size.bgH) this.size.posY = 0;
+                    size.carY += p[1];
+                    var Y = game.realY(size.carY, size.scrH, 48);
+                    if ((Y + 48) > size.scrH) {
+                        size.carY = 0;
+                        size.posY += p[1];
+                        var YY = game.realY(size.posY);
+                        if ((YY + size.scrH) > size.bgH) size.posY = 0;
                     }
                 }
-                this.moveBg();
-                this.updateFgState();
-                this.drawFg();
+                game.moveBg();
+                game.updateFgState();
+                game.drawFg();
                 return false;
             }
 
@@ -110,10 +113,12 @@ TileGame.prototype = {
     moveBg: function () {
         this.canvasRange();
         var game = this;
-        $('canvas.bg.cover').each(function () {
-            game.fillBG ($(this)[0]);
-            game.calcTranslate($(this));
-        });
+        var bg = $('canvas.bg.cover').toArray();
+        for (var i in bg) {
+            this.fillBG(bg[i]);
+            //alert(this.size);
+            this.calcTranslate($(bg[i]));
+        }
         $('canvas.bg').each(function () {
             //calcTranslate($(this));
         });
@@ -150,7 +155,7 @@ TileGame.prototype = {
         }
 
         if (!this.state['car1'])
-            this.state['car1'] = { src: '/content/images/moon_bus.PNG', x: this.size.carX, y: this.realY(this.size.carY, this.size.scrH, 48) };
+            this.state['car1'] = { src: '/images/moon_bus.PNG', x: this.size.carX, y: this.realY(this.size.carY, this.size.scrH, 48) };
         else {
             this.state['car1'].x = this.size.carX; this.state['car1'].y = this.realY(this.size.carY, this.size.scrH, 48);
         }
@@ -159,7 +164,7 @@ TileGame.prototype = {
     },
 
     drawFg: function () {
-        var ctx = mainCanvas.getContext('2d');
+        var ctx = this.mainCanvas.getContext('2d');
         ctx.clearRect(0, 0, this.size.scrW, this.size.scrH);
         for (var s in this.state) {
             var ss = this.state[s];
@@ -186,18 +191,21 @@ TileGame.prototype = {
             }
         }
     },
+
+    main: function () {
+        //            for (var s in this.state) {
+        //                var ss = this.state[s];
+        //                if (ss.fire) {
+        //                    ss.timeOffset = ss.timeOffset + 1;
+        //                    //if (ss.timeOffset > 5) ss.timeOffset = 0;
+        //                }
+        //            }
+        this.updateFgState();
+        this.drawFg();
+    },
     run: function () {
-        var main = setInterval(function () {
-            //            for (var s in this.state) {
-            //                var ss = this.state[s];
-            //                if (ss.fire) {
-            //                    ss.timeOffset = ss.timeOffset + 1;
-            //                    //if (ss.timeOffset > 5) ss.timeOffset = 0;
-            //                }
-            //            }
-            this.updateFgState();
-            this.drawFg();
-        }, 500);
+        game = this;
+        setInterval("game.main()", 500);
         this.createBG();
         this.moveBg();
         this.keyboardInit();
